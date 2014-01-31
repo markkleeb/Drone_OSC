@@ -47,6 +47,7 @@ public:
     
     bool isScanning;
     bool isFlying;
+    bool isArrived;
     bool isTracking;
     bool forward;
     int num;
@@ -59,6 +60,7 @@ public:
     // void tracking(cv::Rect myBlob);
     void trackingCentroid(cv::Point2f blob);
     void sendOsc();
+    void arrived();
     
     void setup();
     void update();

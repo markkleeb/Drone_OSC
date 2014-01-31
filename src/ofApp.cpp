@@ -18,12 +18,13 @@ void ofApp::setup(){
     
 	
     isTracking = false;
+    isArrived = false;
     isScanning = false;
     
     myArea = 0;
     num = 0;
     
-    for(int i=0; i < 10; i++){
+    for(int i=0; i < 12; i++){
         directions.push_back(0);
     }
     
@@ -44,7 +45,7 @@ void ofApp::setup(){
 	trackingColorMode = TRACK_COLOR_RGB;
     
     
-    threshold = 5;
+    threshold = 3;
     targetColor = ofColor(255, 0, 0);
     contourFinder.setTargetColor(targetColor, trackingColorMode);
     
@@ -99,8 +100,8 @@ void ofApp::update(){
     else {return;}
     //cout << imageBelowWindow()[0] << endl;
     
-    if(isFlying && ofGetElapsedTimeMillis() - startTimer > 5000){
-    scanning();
+    if(isFlying && ofGetElapsedTimeMillis() - startTimer > 8000){
+        scanning();
     }
     
     
@@ -111,6 +112,10 @@ void ofApp::update(){
     }
     
    
+    
+    if(isArrived){
+        arrived();
+    }
     
     if(ofGetElapsedTimeMillis() - timer > 100){
     
@@ -158,6 +163,15 @@ void ofApp::draw(){
         
         
         //Contour Finder
+        drawHighlightString("Flying? " + ofToString(isFlying), 10, 100);
+        drawHighlightString("Scanning? " + ofToString(isScanning), 10, 120);
+        drawHighlightString("Tracking? " + ofToString(isTracking), 10, 140);
+        drawHighlightString("Arrived? " + ofToString(isArrived), 10, 160);
+
+        
+
+
+        
         contourFinder.draw();
         drawHighlightString(ofToString((int) ofGetFrameRate()) + " fps", 10, 300);
         drawHighlightString(ofToString((int) threshold) + " threshold", 10, 320);
@@ -204,7 +218,7 @@ void ofApp::scanning(){
     
     
     //drone.controller.spinSpeed += s;
-    
+   
     checkContours();
     
 
@@ -244,6 +258,7 @@ void ofApp::trackingCentroid(cv::Point2f blobCoordinates){
     if( getCenterRect().x > ofGetWindowWidth()/2-100 && getCenterRect().x < ofGetWindowWidth()/2+100 && getCenterRect().y > ofGetWindowHeight()/2 - 100 && getCenterRect().y < ofGetWindowHeight()/2 + 100){
      
         directions[4] = 1;
+        directions[10] = 0;
         
         forward = true;
     }
@@ -251,12 +266,14 @@ void ofApp::trackingCentroid(cv::Point2f blobCoordinates){
     else{
         forward = false;
         directions[4] = 0;
+        directions[10] = 0;
     }
     
     if(getCenterRect().x > ofGetWindowWidth()/2) {
         
         directions[3] = 1;
         directions[2] = 0;
+        directions[10] = 0;
 
         
     }
@@ -265,6 +282,7 @@ void ofApp::trackingCentroid(cv::Point2f blobCoordinates){
         
         directions[2] = 1;
         directions[3] = 0;
+        directions[10] = 0;
 
         
     }
@@ -272,18 +290,21 @@ void ofApp::trackingCentroid(cv::Point2f blobCoordinates){
     else {
         directions[2] = 0;
         directions[3]=0;
+        directions[10] = 0;
     }
     
     if(getCenterRect().y > ofGetWindowHeight()/2) {
         
         directions[1] = 1;
         directions[0] = 0;
+        directions[10] = 0;
     }
     
     else if(getCenterRect().y < ofGetWindowHeight()/2) {
         
         directions[0] = 1;
         directions[1] = 0;
+        directions[10] = 0;
         
     }
     
@@ -291,6 +312,7 @@ void ofApp::trackingCentroid(cv::Point2f blobCoordinates){
         
         directions[0] = 0;
         directions[1] = 0;
+        directions[10] = 0;
 
     }
     
@@ -317,16 +339,23 @@ void ofApp::checkContours(){
             
         }
         
-        if(myArea > 15000){
+        if(myArea > 10000){
             
             isScanning = false;
             isTracking = true;
-            
+            isArrived = false;
+        }
+        
+        else if(myArea > 100000){
+            isScanning = false;
+            isTracking = false;
+            isArrived = true;
         }
         
         else{
             isScanning = true;
             isTracking = false;
+            isArrived = false;
         }
         
     }
@@ -334,6 +363,18 @@ void ofApp::checkContours(){
 }
 
 //--------------------------------------------------------------
+
+void ofApp::arrived(){
+    
+    for(int i=0; i<directions.size(); i++){
+        directions[i] = 0;
+    }
+    
+    directions[10] = 1;
+    
+    
+    
+}
 //--------------------------------------------------------------
 void ofApp::keyPressed(int key){
 	/*
@@ -348,51 +389,70 @@ void ofApp::keyPressed(int key){
     switch(key){
              
 
+        case 'e':
+            
+            directions[11] = 1;
+            
+            
+            
+            break;
+
+            
      case 't':
            
             directions[8] = 1;
+            directions[10] = 0;
+            
             
             break;
         
         case 'l':
            
             directions[9] = 1;
+           directions[10] = 0;
             break;
         
         case 'w':
             
             directions[0] = 1;
-            
+            directions[10] = 0;
         break;
         case 'a':
             
             directions[2]=1;
+            directions[10] = 0;
             break;
         case 's':
             
             directions[1] = 1;
+            directions[10] = 0;
             break;
         case 'd':
             
             directions[3] = 1;
+            directions[10] = 0;
             break;
             
         case OF_KEY_UP:
             
             directions[4] = 1;
+            directions[10] = 0;
             break;
             
         case OF_KEY_DOWN:
             
             directions[5] = 1;
+            directions[10] = 0;
             break;
         case OF_KEY_LEFT:
             
-            directions[7] = 1;
+            directions[6] = 1;
+            directions[10] = 0;
             break;
         case OF_KEY_RIGHT:
             
-            directions[6] = 1;
+            directions[7] = 1;
+            directions[10] = 0;
             break;
 
     }
@@ -403,10 +463,15 @@ void ofApp::keyReleased(int key){
     
     switch(key){
             
+            
+        case 'e':
+            
+            directions[11] = 0;
+            break;
+            
         case ' ': debug = !debug;
             break;
         case 't':
-            
             
             directions[8] = 0;
             isFlying = true;
@@ -429,37 +494,52 @@ void ofApp::keyReleased(int key){
         case 'w':
             
             directions[0] = 0;
+            directions[10] = 1;
             
             break;
         case 'a':
             
             directions[2]=0;
+            directions[10] = 1;
+            
             break;
         case 's':
             
             directions[1] = 0;
+            directions[10] = 1;
+            
             break;
         case 'd':
             
             directions[3] = 0;
+            directions[10] = 1;
+            
             break;
             
         case OF_KEY_UP:
             
             directions[4] = 0;
+            directions[10] = 1;
+            
             break;
             
         case OF_KEY_DOWN:
             
             directions[5] = 0;
+            directions[10] = 1;
+            
             break;
         case OF_KEY_LEFT:
             
-            directions[7] = 0;
+            directions[6] = 0;
+            directions[10] = 1;
+            
             break;
         case OF_KEY_RIGHT:
             
-            directions[6] = 0;
+            directions[7] = 0;
+            directions[10] = 1;
+            
             break;
             
     }
