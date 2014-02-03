@@ -167,6 +167,8 @@ void ofApp::draw(){
         drawHighlightString("Scanning? " + ofToString(isScanning), 10, 120);
         drawHighlightString("Tracking? " + ofToString(isTracking), 10, 140);
         drawHighlightString("Arrived? " + ofToString(isArrived), 10, 160);
+        drawHighlightString("Area " + ofToString(myArea), 10, 180);
+        
 
         
 
