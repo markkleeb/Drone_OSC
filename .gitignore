@@ -2,5 +2,6 @@
 *.app
 */build/
 Drone_OSC.build/
-*xcuserstate
+Drone_OSC.xcodeproj/xcshareddata
+Drone_OSC.xcodeproj/xcuserstate
 build
