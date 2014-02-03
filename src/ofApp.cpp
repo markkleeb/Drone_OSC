@@ -166,7 +166,7 @@ void ofApp::draw(){
         drawHighlightString("Flying? " + ofToString(isFlying), 10, 100);
         drawHighlightString("Scanning? " + ofToString(isScanning), 10, 120);
         drawHighlightString("Tracking? " + ofToString(isTracking), 10, 140);
-        drawHighlightString("Moving Forward? " + ofToString(isTracking), 10, 160);
+        drawHighlightString("Moving Forward? " + ofToString(forward), 10, 160);
 
         drawHighlightString("Arrived? " + ofToString(isArrived), 10, 180);
         drawHighlightString("Area " + ofToString(myArea), 10, 200);
@@ -290,12 +290,9 @@ void ofApp::trackingCentroid(cv::Point2f blobCoordinates){
         forward = false;
         
         directions[4] = 0;
-        directions[10] = 1;
-    }
     
     
     
-    if(forward == false){
     if(getCenterRect().x > ofGetWindowWidth()/2) {
         
         int timer = ofGetElapsedTimeMillis();
@@ -315,7 +312,7 @@ void ofApp::trackingCentroid(cv::Point2f blobCoordinates){
         
         int timer = ofGetElapsedTimeMillis();
         
-        if(ofGetElapsedTimeMillis() - timer < 500){
+        if(ofGetElapsedTimeMillis() - timer < 1000){
         
         directions[7] = 1;
         directions[6] = 0;
