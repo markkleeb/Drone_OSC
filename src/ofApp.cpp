@@ -45,7 +45,7 @@ void ofApp::setup(){
 	trackingColorMode = TRACK_COLOR_RGB;
     
     
-    threshold = 10;
+    threshold = 20;
     targetColor = ofColor(255, 0, 0);
     contourFinder.setTargetColor(targetColor, trackingColorMode);
     
@@ -168,10 +168,19 @@ void ofApp::draw(){
         drawHighlightString("Tracking? " + ofToString(isTracking), 10, 140);
         drawHighlightString("Arrived? " + ofToString(isArrived), 10, 160);
         drawHighlightString("Area " + ofToString(myArea), 10, 180);
-        drawHighlightString("Color Threshold " + ofToString(threshold), 10, 200);
 
         
-
+        drawHighlightString("Up " + ofToString(directions[0]), ofGetWindowWidth()-120, 100);
+        drawHighlightString("Down " + ofToString(directions[1]), ofGetWindowWidth()-120, 120);
+        drawHighlightString("Left " + ofToString(directions[2]), ofGetWindowWidth()-120, 140);
+        drawHighlightString("Right " + ofToString(directions[3]), ofGetWindowWidth()-120, 160);
+        drawHighlightString("Forward " + ofToString(directions[4]), ofGetWindowWidth()-120, 180);
+        drawHighlightString("Backward " + ofToString(directions[5]), ofGetWindowWidth()-120, 200);
+        drawHighlightString("Clockwise " + ofToString(directions[6]), ofGetWindowWidth()-120, 220);
+        drawHighlightString("Counterclockwise " + ofToString(directions[7]), ofGetWindowWidth()-120, 240);
+        
+        
+        
         
 
 
@@ -259,7 +268,7 @@ cv::Point2f ofApp::getCenterRect(){
 void ofApp::trackingCentroid(cv::Point2f blobCoordinates){
     
     
-    if( getCenterRect().x > ofGetWindowWidth()/2-100 && getCenterRect().x < ofGetWindowWidth()/2+100 && getCenterRect().y > ofGetWindowHeight()/2 - 100 && getCenterRect().y < ofGetWindowHeight()/2 + 100){
+    if( getCenterRect().x > ofGetWindowWidth()/2-200 && getCenterRect().x < ofGetWindowWidth()/2+200 && getCenterRect().y > ofGetWindowHeight()/2 - 200 && getCenterRect().y < ofGetWindowHeight()/2 + 200){
      
         directions[4] = 1;
         directions[10] = 0;
@@ -273,7 +282,7 @@ void ofApp::trackingCentroid(cv::Point2f blobCoordinates){
         directions[10] = 0;
     }
     
-    if(getCenterRect().x > ofGetWindowWidth()/2) {
+    if(getCenterRect().x > ofGetWindowWidth()/2+100) {
         
         directions[3] = 1;
         directions[2] = 0;
@@ -282,7 +291,7 @@ void ofApp::trackingCentroid(cv::Point2f blobCoordinates){
         
     }
     
-    else if(getCenterRect().x < ofGetWindowWidth()/2) {
+    else if(getCenterRect().x < ofGetWindowWidth()/2-100) {
         
         directions[2] = 1;
         directions[3] = 0;
@@ -297,14 +306,14 @@ void ofApp::trackingCentroid(cv::Point2f blobCoordinates){
         directions[10] = 0;
     }
     
-    if(getCenterRect().y > ofGetWindowHeight()/2) {
+    if(getCenterRect().y > ofGetWindowHeight()/2+100) {
         
         directions[1] = 1;
         directions[0] = 0;
         directions[10] = 0;
     }
     
-    else if(getCenterRect().y < ofGetWindowHeight()/2) {
+    else if(getCenterRect().y < ofGetWindowHeight()/2-100) {
         
         directions[0] = 1;
         directions[1] = 0;
@@ -343,14 +352,14 @@ void ofApp::checkContours(){
             
         }
         
-        if(myArea > 10000){
+        if(myArea > 5000 && myArea < 100000){
             
             isScanning = false;
             isTracking = true;
             isArrived = false;
         }
         
-        else if(myArea > 100000){
+        else if(myArea > 100000 ){
             isScanning = false;
             isTracking = false;
             isArrived = true;
@@ -450,12 +459,12 @@ void ofApp::keyPressed(int key){
             break;
         case OF_KEY_LEFT:
             
-            directions[6] = 1;
+            directions[7] = 1;
             directions[10] = 0;
             break;
         case OF_KEY_RIGHT:
             
-            directions[7] = 1;
+            directions[6] = 1;
             directions[10] = 0;
             break;
 
@@ -535,13 +544,13 @@ void ofApp::keyReleased(int key){
             break;
         case OF_KEY_LEFT:
             
-            directions[6] = 0;
+            directions[7] = 0;
             directions[10] = 1;
             
             break;
         case OF_KEY_RIGHT:
             
-            directions[7] = 0;
+            directions[6] = 0;
             directions[10] = 1;
             
             break;
