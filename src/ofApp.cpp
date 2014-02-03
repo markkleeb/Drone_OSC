@@ -156,7 +156,7 @@ void ofApp::draw(){
     ofEllipse(ofGetWindowWidth()/2, ofGetWindowHeight()/2, 10, 10);
     ofNoFill();
     ofSetLineWidth(5);
-    ofRect(ofGetWindowWidth()/2-100, ofGetWindowHeight()/2-100, 200, 200);
+    ofRect(ofGetWindowWidth()/2-200, ofGetWindowHeight()/2-200, 400, 400);
     ofSetLineWidth(1);
     
     if(debug == true){
@@ -166,18 +166,20 @@ void ofApp::draw(){
         drawHighlightString("Flying? " + ofToString(isFlying), 10, 100);
         drawHighlightString("Scanning? " + ofToString(isScanning), 10, 120);
         drawHighlightString("Tracking? " + ofToString(isTracking), 10, 140);
-        drawHighlightString("Arrived? " + ofToString(isArrived), 10, 160);
-        drawHighlightString("Area " + ofToString(myArea), 10, 180);
+        drawHighlightString("Moving Forward? " + ofToString(isTracking), 10, 160);
+
+        drawHighlightString("Arrived? " + ofToString(isArrived), 10, 180);
+        drawHighlightString("Area " + ofToString(myArea), 10, 200);
 
         
-        drawHighlightString("Up " + ofToString(directions[0]), ofGetWindowWidth()-120, 100);
-        drawHighlightString("Down " + ofToString(directions[1]), ofGetWindowWidth()-120, 120);
-        drawHighlightString("Left " + ofToString(directions[2]), ofGetWindowWidth()-120, 140);
-        drawHighlightString("Right " + ofToString(directions[3]), ofGetWindowWidth()-120, 160);
-        drawHighlightString("Forward " + ofToString(directions[4]), ofGetWindowWidth()-120, 180);
-        drawHighlightString("Backward " + ofToString(directions[5]), ofGetWindowWidth()-120, 200);
-        drawHighlightString("Clockwise " + ofToString(directions[6]), ofGetWindowWidth()-120, 220);
-        drawHighlightString("Counterclockwise " + ofToString(directions[7]), ofGetWindowWidth()-120, 240);
+        drawHighlightString("Up " + ofToString(directions[0]), ofGetWindowWidth()-150, 100);
+        drawHighlightString("Down " + ofToString(directions[1]), ofGetWindowWidth()-150, 120);
+        drawHighlightString("Left " + ofToString(directions[2]), ofGetWindowWidth()-150, 140);
+        drawHighlightString("Right " + ofToString(directions[3]), ofGetWindowWidth()-150, 160);
+        drawHighlightString("Forward " + ofToString(directions[4]), ofGetWindowWidth()-150, 180);
+        drawHighlightString("Backward " + ofToString(directions[5]), ofGetWindowWidth()-150, 200);
+        drawHighlightString("Clockwise " + ofToString(directions[6]), ofGetWindowWidth()-150, 220);
+        drawHighlightString("Counterclockwise " + ofToString(directions[7]), ofGetWindowWidth()-150, 240);
         
         
         
@@ -268,67 +270,101 @@ cv::Point2f ofApp::getCenterRect(){
 void ofApp::trackingCentroid(cv::Point2f blobCoordinates){
     
     
+    //move forward
+    
     if( getCenterRect().x > ofGetWindowWidth()/2-200 && getCenterRect().x < ofGetWindowWidth()/2+200 && getCenterRect().y > ofGetWindowHeight()/2 - 200 && getCenterRect().y < ofGetWindowHeight()/2 + 200){
      
+        int timer = ofGetElapsedTimeMillis();
+        
+        if (ofGetElapsedTimeMillis() - timer < 1000){
         directions[4] = 1;
         directions[10] = 0;
         
         forward = true;
+        }
+        directions[10]=1;
     }
     
+    //stop and analyze situation
     else{
         forward = false;
+        
         directions[4] = 0;
-        directions[10] = 0;
+        directions[10] = 1;
     }
     
-    if(getCenterRect().x > ofGetWindowWidth()/2+100) {
+    
+    
+    if(forward == false){
+    if(getCenterRect().x > ofGetWindowWidth()/2) {
         
-        directions[3] = 1;
-        directions[2] = 0;
+        int timer = ofGetElapsedTimeMillis();
+        
+        if(ofGetElapsedTimeMillis()- timer < 500){
+        
+        directions[6] = 1;
+        directions[7] = 0;
         directions[10] = 0;
+        }
+        directions[10] = 1;
 
         
     }
     
-    else if(getCenterRect().x < ofGetWindowWidth()/2-100) {
+    else if(getCenterRect().x < ofGetWindowWidth()/2) {
         
-        directions[2] = 1;
-        directions[3] = 0;
+        int timer = ofGetElapsedTimeMillis();
+        
+        if(ofGetElapsedTimeMillis() - timer < 500){
+        
+        directions[7] = 1;
+        directions[6] = 0;
         directions[10] = 0;
-
+        }
+        directions[10] = 1;
         
     }
     
     else {
-        directions[2] = 0;
-        directions[3]=0;
-        directions[10] = 0;
+        directions[6] = 0;
+        directions[7]=0;
+        directions[10] = 1;
     }
     
-    if(getCenterRect().y > ofGetWindowHeight()/2+100) {
+    if(getCenterRect().y > ofGetWindowHeight()/2) {
+        
+        int timer = ofGetElapsedTimeMillis();
+        
+        if(ofGetElapsedTimeMillis() - timer < 500){
         
         directions[1] = 1;
         directions[0] = 0;
         directions[10] = 0;
+        }
+        directions[10] = 1;
     }
     
-    else if(getCenterRect().y < ofGetWindowHeight()/2-100) {
+    else if(getCenterRect().y < ofGetWindowHeight()/2) {
+        
+        int timer = ofGetElapsedTimeMillis();
+        
+        if(ofGetElapsedTimeMillis() - timer < 500){
         
         directions[0] = 1;
         directions[1] = 0;
         directions[10] = 0;
-        
+        }
+        directions[10] = 1;
     }
     
     else {
         
         directions[0] = 0;
         directions[1] = 0;
-        directions[10] = 0;
+        directions[10] = 1;
 
     }
-    
+    }
     
     // drone.controller.pitchAmount = 0;
     
