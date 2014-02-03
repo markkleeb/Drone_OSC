@@ -45,7 +45,7 @@ void ofApp::setup(){
 	trackingColorMode = TRACK_COLOR_RGB;
     
     
-    threshold = 3;
+    threshold = 10;
     targetColor = ofColor(255, 0, 0);
     contourFinder.setTargetColor(targetColor, trackingColorMode);
     
@@ -168,6 +168,8 @@ void ofApp::draw(){
         drawHighlightString("Tracking? " + ofToString(isTracking), 10, 140);
         drawHighlightString("Arrived? " + ofToString(isArrived), 10, 160);
         drawHighlightString("Area " + ofToString(myArea), 10, 180);
+        drawHighlightString("Color Threshold " + ofToString(threshold), 10, 200);
+
         
 
         
@@ -543,8 +545,14 @@ void ofApp::keyReleased(int key){
             directions[10] = 1;
             
             break;
-            
+        case '=':
+            threshold = threshold + 1;
+            break;
+        case '-':
+            threshold = threshold - 1;
+            break;
     }
+    
 
     
 }
