@@ -44,6 +44,7 @@ public:
     
     float startTimer;
     float timer;
+    float stopTimer;
     
     bool isScanning;
     bool isFlying;

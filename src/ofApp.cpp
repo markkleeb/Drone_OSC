@@ -12,6 +12,8 @@ void ofApp::setup(){
     
     timer = ofGetElapsedTimeMillis();
     startTimer = ofGetElapsedTimeMillis();
+    stopTimer = ofGetElapsedTimeMillis();
+    
     
     ofSetVerticalSync(true);
     ofSetFrameRate(60);
@@ -282,11 +284,23 @@ void ofApp::trackingCentroid(cv::Point2f blobCoordinates){
         
         forward = true;
         }
-        directions[10]=1;
+       
     }
     
     //stop and analyze situation
     else{
+        
+        
+        
+        if(ofGetElapsedTimeMillis() - stopTimer < 100){
+            
+            directions[10] = 1;
+            cout << "here\n";
+            stopTimer = ofGetElapsedTimeMillis();
+            
+        }
+        directions[10] = 0;
+        
         forward = false;
         
         directions[4] = 0;
@@ -303,7 +317,7 @@ void ofApp::trackingCentroid(cv::Point2f blobCoordinates){
         directions[7] = 0;
         directions[10] = 0;
         }
-        directions[10] = 1;
+       
 
         
     }
@@ -318,14 +332,14 @@ void ofApp::trackingCentroid(cv::Point2f blobCoordinates){
         directions[6] = 0;
         directions[10] = 0;
         }
-        directions[10] = 1;
+       
         
     }
     
     else {
         directions[6] = 0;
         directions[7]=0;
-        directions[10] = 1;
+      
     }
     
     if(getCenterRect().y > ofGetWindowHeight()/2) {
@@ -338,7 +352,7 @@ void ofApp::trackingCentroid(cv::Point2f blobCoordinates){
         directions[0] = 0;
         directions[10] = 0;
         }
-        directions[10] = 1;
+        
     }
     
     else if(getCenterRect().y < ofGetWindowHeight()/2) {
@@ -351,16 +365,19 @@ void ofApp::trackingCentroid(cv::Point2f blobCoordinates){
         directions[1] = 0;
         directions[10] = 0;
         }
-        directions[10] = 1;
+        
     }
     
     else {
         
         directions[0] = 0;
         directions[1] = 0;
-        directions[10] = 1;
+        
 
     }
+ 
+
+    
     }
     
     // drone.controller.pitchAmount = 0;
