@@ -11,13 +11,13 @@ extern "C" {
 void ofApp::setup(){
     
     timer = ofGetElapsedTimeMillis();
-    startTimer = ofGetElapsedTimeMillis();
-    stopTimer = ofGetElapsedTimeMillis();
-    
+   
     
     ofSetVerticalSync(true);
     ofSetFrameRate(60);
     
+    stop = false;
+  
 	
     isTracking = false;
     isArrived = false;
@@ -103,7 +103,10 @@ void ofApp::update(){
     //cout << imageBelowWindow()[0] << endl;
     
     if(isFlying && ofGetElapsedTimeMillis() - startTimer > 8000){
+        
+
         scanning();
+       
     }
     
     
@@ -169,9 +172,9 @@ void ofApp::draw(){
         drawHighlightString("Scanning? " + ofToString(isScanning), 10, 120);
         drawHighlightString("Tracking? " + ofToString(isTracking), 10, 140);
         drawHighlightString("Moving Forward? " + ofToString(forward), 10, 160);
-
-        drawHighlightString("Arrived? " + ofToString(isArrived), 10, 180);
-        drawHighlightString("Area " + ofToString(myArea), 10, 200);
+         drawHighlightString("Arrived? " + ofToString(isArrived), 10, 180);
+         drawHighlightString("Stop? " + ofToString(stop), 10, 200);
+        drawHighlightString("Area " + ofToString(myArea), 10, 260);
 
         
         drawHighlightString("Up " + ofToString(directions[0]), ofGetWindowWidth()-150, 100);
@@ -237,7 +240,8 @@ void ofApp::scanning(){
     //drone.controller.spinSpeed += s;
    
     checkContours();
-    
+    adjustHorizontal();
+    adjustVertical();
 
     }
 
@@ -274,97 +278,56 @@ void ofApp::trackingCentroid(cv::Point2f blobCoordinates){
     
     //move forward
     
-    if( getCenterRect().x > ofGetWindowWidth()/2-200 && getCenterRect().x < ofGetWindowWidth()/2+200 && getCenterRect().y > ofGetWindowHeight()/2 - 200 && getCenterRect().y < ofGetWindowHeight()/2 + 200){
-     
-        int timer = ofGetElapsedTimeMillis();
-        
-        if (ofGetElapsedTimeMillis() - timer < 1000){
-        directions[4] = 1;
-        directions[10] = 0;
-        
+    if( getCenterRect().x > ofGetWindowWidth()/2-200 && getCenterRect().x < ofGetWindowWidth()/2+200 && !isArrived ){
         forward = true;
+        moveForward();
+        if(ofGetElapsedTimeMillis() - forwardTimer > 500){
+            forward = false;
+            stop = true;
+            forwardTimer = ofGetElapsedTimeMillis();
         }
-       
     }
-    
-    //stop and analyze situation
-    else{
+       
+      
+    else if(stop){
+        arrived();
+        if(ofGetElapsedTimeMillis() - stopTimer > 500){
+            stop = false;
         
-        
-        
-        if(ofGetElapsedTimeMillis() - stopTimer < 100){
-            
-            directions[10] = 1;
             cout << "here\n";
             stopTimer = ofGetElapsedTimeMillis();
-            
         }
-        directions[10] = 0;
         
-        forward = false;
         
-        directions[4] = 0;
+    }
     
     
+  
     
-    if(getCenterRect().x > ofGetWindowWidth()/2) {
-        
-        int timer = ofGetElapsedTimeMillis();
-        
-        if(ofGetElapsedTimeMillis()- timer < 500){
-        
-        directions[6] = 1;
-        directions[7] = 0;
-        directions[10] = 0;
-        }
-       
+    
+}
 
-        
-    }
+//--------------------------------------------------------------
+void ofApp::adjustVertical(){
     
-    else if(getCenterRect().x < ofGetWindowWidth()/2) {
-        
-        int timer = ofGetElapsedTimeMillis();
-        
-        if(ofGetElapsedTimeMillis() - timer < 1000){
-        
-        directions[7] = 1;
-        directions[6] = 0;
-        directions[10] = 0;
-        }
-       
-        
-    }
-    
-    else {
-        directions[6] = 0;
-        directions[7]=0;
-      
-    }
     
     if(getCenterRect().y > ofGetWindowHeight()/2) {
         
-        int timer = ofGetElapsedTimeMillis();
+                  
+            directions[1] = 0;
+            directions[0] = 0;
+            directions[10] = 0;
         
-        if(ofGetElapsedTimeMillis() - timer < 500){
-        
-        directions[1] = 1;
-        directions[0] = 0;
-        directions[10] = 0;
-        }
         
     }
     
     else if(getCenterRect().y < ofGetWindowHeight()/2) {
         
-        int timer = ofGetElapsedTimeMillis();
+                    
+            directions[0] = 1;
+            directions[1] = 0;
+            directions[10] = 0;
         
-        if(ofGetElapsedTimeMillis() - timer < 500){
-        
-        directions[0] = 1;
-        directions[1] = 0;
-        directions[10] = 0;
-        }
         
     }
     
@@ -373,17 +336,53 @@ void ofApp::trackingCentroid(cv::Point2f blobCoordinates){
         directions[0] = 0;
         directions[1] = 0;
         
-
+        
     }
- 
 
     
+    
+}
+
+//--------------------------------------------------------------
+void ofApp::adjustHorizontal(){
+    
+    
+    if(getCenterRect().x > ofGetWindowWidth()/2) {
+        
+       
+            directions[6] = 1;
+            directions[7] = 0;
+            directions[10] = 0;
+        
     }
     
-    // drone.controller.pitchAmount = 0;
+    else if(getCenterRect().x < ofGetWindowWidth()/2) {
+            
+            directions[7] = 1;
+            directions[6] = 0;
+            directions[10] = 0;
+        
+    }
     
-    //checkContours();
+    else {
+        
+        directions[6] = 0;
+        directions[7]=0;
+        
+    }
+
+
     
+    
+    
+}
+//--------------------------------------------------------------
+
+void ofApp::moveForward(){
+
+    
+    directions[4] = 1;
+    directions[10] = 0;
     
     
     
@@ -402,17 +401,22 @@ void ofApp::checkContours(){
             
         }
         
-        if(myArea > 5000 && myArea < 100000){
+        if(myArea > 5000 && myArea < 25000){
             
             isScanning = false;
             isTracking = true;
             isArrived = false;
+            stopTimer = ofGetElapsedTimeMillis();
+            forwardTimer = ofGetElapsedTimeMillis();
+            vertTimer = ofGetElapsedTimeMillis();
+            horzTimer = ofGetElapsedTimeMillis();
         }
         
-        else if(myArea > 100000 ){
+        else if(myArea > 25000 ){
             isScanning = false;
             isTracking = false;
             isArrived = true;
+            stop = true;
         }
         
         else{
@@ -429,11 +433,16 @@ void ofApp::checkContours(){
 
 void ofApp::arrived(){
     
+  
+    
     for(int i=0; i<directions.size(); i++){
         directions[i] = 0;
     }
     
     directions[10] = 1;
+    
+    stop  = true;
+    forward = false;
     
     
     
@@ -465,7 +474,7 @@ void ofApp::keyPressed(int key){
            
             directions[8] = 1;
             directions[10] = 0;
-            
+            startTimer = ofGetElapsedTimeMillis();
             
             break;
         
@@ -517,6 +526,15 @@ void ofApp::keyPressed(int key){
             directions[6] = 1;
             directions[10] = 0;
             break;
+            
+        case 'p':
+            
+            for(int i=0; i<directions.size(); i++){
+                directions[i] = 0;
+            }
+            
+            directions[10] = 1;
+            break;
 
     }
     }
@@ -557,52 +575,50 @@ void ofApp::keyReleased(int key){
         case 'w':
             
             directions[0] = 0;
-            directions[10] = 1;
+            
             
             break;
         case 'a':
             
             directions[2]=0;
-            directions[10] = 1;
+            
             
             break;
         case 's':
             
             directions[1] = 0;
-            directions[10] = 1;
             
             break;
         case 'd':
             
             directions[3] = 0;
-            directions[10] = 1;
+           
             
             break;
             
         case OF_KEY_UP:
             
             directions[4] = 0;
-            directions[10] = 1;
+            
             
             break;
             
         case OF_KEY_DOWN:
             
             directions[5] = 0;
-            directions[10] = 1;
+            
             
             break;
         case OF_KEY_LEFT:
             
             directions[7] = 0;
-            directions[10] = 1;
+            
             
             break;
         case OF_KEY_RIGHT:
             
             directions[6] = 0;
-            directions[10] = 1;
-            
+                       
             break;
         case '=':
             threshold = threshold + 1;
@@ -610,6 +626,9 @@ void ofApp::keyReleased(int key){
         case '-':
             threshold = threshold - 1;
             break;
+            
+     
+            
     }
     
 

@@ -40,11 +40,9 @@ public:
     float myArea2;
     ofPoint myCentroid;
     
-    bool debug;
+    bool debug, stop;
     
-    float startTimer;
-    float timer;
-    float stopTimer;
+    float startTimer, timer, stopTimer, forwardTimer, vertTimer, horzTimer;
     
     bool isScanning;
     bool isFlying;
@@ -62,6 +60,9 @@ public:
     void trackingCentroid(cv::Point2f blob);
     void sendOsc();
     void arrived();
+    void adjustHorizontal();
+    void adjustVertical();
+    void moveForward();
     
     void setup();
     void update();
