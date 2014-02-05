@@ -18,7 +18,7 @@ void ofApp::setup(){
     
     stop = false;
   
-	
+	turnaround = false;
     isTracking = false;
     isArrived = false;
     isScanning = false;
@@ -102,13 +102,17 @@ void ofApp::update(){
     else {return;}
     //cout << imageBelowWindow()[0] << endl;
     
-    if(isFlying && ofGetElapsedTimeMillis() - startTimer > 8000){
+    if(isFlying && ofGetElapsedTimeMillis() - startTimer > 8000 && !isArrived && !turnaround){
         
 
-        scanning();
+        isScanning = true;
        
     }
     
+    
+    if(isScanning){
+        scanning();
+    }
     
     
     if(isTracking){
@@ -116,10 +120,25 @@ void ofApp::update(){
         trackingCentroid(getCenterRect());
     }
     
-   
     
     if(isArrived){
         arrived();
+    }
+    
+    if(turnaround){
+        turnAround();
+    }
+    
+    
+    if(stop){
+        
+        for(int i=0; i<10; i++){
+            directions[i] = 0;
+        }
+        
+        directions[10] = 1;
+
+        
     }
     
     if(ofGetElapsedTimeMillis() - timer > 100){
@@ -127,6 +146,8 @@ void ofApp::update(){
         sendOsc();
         timer = ofGetElapsedTimeMillis();
     }
+    
+    
     
     
 }
@@ -174,6 +195,8 @@ void ofApp::draw(){
         drawHighlightString("Moving Forward? " + ofToString(forward), 10, 160);
          drawHighlightString("Arrived? " + ofToString(isArrived), 10, 180);
          drawHighlightString("Stop? " + ofToString(stop), 10, 200);
+        drawHighlightString("Turnaround? " + ofToString(turnaround), 10, 200);
+
         drawHighlightString("Area " + ofToString(myArea), 10, 260);
 
         
@@ -283,12 +306,10 @@ void ofApp::trackingCentroid(cv::Point2f blobCoordinates){
         moveForward();
         if(ofGetElapsedTimeMillis() - forwardTimer > 500){
             forward = false;
-            stop = true;
+            //stop = true;
             forwardTimer = ofGetElapsedTimeMillis();
         }
     }
-       
-      
     else if(stop){
         arrived();
         if(ofGetElapsedTimeMillis() - stopTimer > 500){
@@ -297,14 +318,7 @@ void ofApp::trackingCentroid(cv::Point2f blobCoordinates){
             cout << "here\n";
             stopTimer = ofGetElapsedTimeMillis();
         }
-        
-        
     }
-    
-    
-  
-    
-    
 }
 
 //--------------------------------------------------------------
@@ -314,7 +328,7 @@ void ofApp::adjustVertical(){
     if(getCenterRect().y > ofGetWindowHeight()/2) {
         
                   
-            directions[1] = 0;
+            directions[1] = 1;
             directions[0] = 0;
             directions[10] = 0;
         
@@ -377,6 +391,19 @@ void ofApp::adjustHorizontal(){
     
 }
 //--------------------------------------------------------------
+void ofApp::turnAround(){
+      directions[6] = 1;
+        stop = false;
+    if(ofGetElapsedTimeMillis() - turnaroundTimer > 10000){
+  
+        
+        turnaround = false;
+        isScanning = true;
+    }
+    
+}
+
+//--------------------------------------------------------------
 
 void ofApp::moveForward(){
 
@@ -401,7 +428,7 @@ void ofApp::checkContours(){
             
         }
         
-        if(myArea > 5000 && myArea < 25000){
+        if(myArea > 1000 && myArea < 50000){
             
             isScanning = false;
             isTracking = true;
@@ -412,11 +439,12 @@ void ofApp::checkContours(){
             horzTimer = ofGetElapsedTimeMillis();
         }
         
-        else if(myArea > 25000 ){
+        else if(myArea > 50000 ){
             isScanning = false;
             isTracking = false;
             isArrived = true;
-            stop = true;
+            arriveTimer = ofGetElapsedTimeMillis();
+           
         }
         
         else{
@@ -435,7 +463,7 @@ void ofApp::arrived(){
     
   
     
-    for(int i=0; i<directions.size(); i++){
+    for(int i=0; i<10; i++){
         directions[i] = 0;
     }
     
@@ -445,18 +473,19 @@ void ofApp::arrived(){
     forward = false;
     
     
+    if(ofGetElapsedTimeMillis() - arriveTimer > 3000){
+    turnaroundTimer = ofGetElapsedTimeMillis();
+    turnaround = true;
+    stop = false;
+    isArrived = false;
+    }
+    
     
 }
 //--------------------------------------------------------------
 void ofApp::keyPressed(int key){
-	/*
-    if(key == 'a' || key == 'A'){
-		ofxOscMessage m;
-		m.setAddress("/pilot");
-		m.addStringArg("'/pilot/drone', {action: 'takeoff'}");
-		sender.sendMessage(m);
-	}
-     */
+
+    
    
     switch(key){
              
@@ -529,11 +558,20 @@ void ofApp::keyPressed(int key){
             
         case 'p':
             
-            for(int i=0; i<directions.size(); i++){
+            
+            isTracking = false;
+            isScanning = false;
+            forward = false;
+            stop = true;
+            for(int i=0; i<10; i++){
                 directions[i] = 0;
             }
             
             directions[10] = 1;
+            break;
+            
+        case 'o':
+            isFlying = true;
             break;
 
     }
@@ -555,7 +593,6 @@ void ofApp::keyReleased(int key){
         case 't':
             
             directions[8] = 0;
-            isFlying = true;
             startTimer = ofGetElapsedTimeMillis();
             
             break;

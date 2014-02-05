@@ -40,9 +40,9 @@ public:
     float myArea2;
     ofPoint myCentroid;
     
-    bool debug, stop;
+    bool debug, stop, turnaround;
     
-    float startTimer, timer, stopTimer, forwardTimer, vertTimer, horzTimer;
+    float startTimer, timer, stopTimer, forwardTimer, vertTimer, horzTimer, arriveTimer, turnaroundTimer;
     
     bool isScanning;
     bool isFlying;
@@ -54,6 +54,7 @@ public:
     
     void checkContours();
     void scanning();
+    void turnAround();
     cv::Point2f getCenterRect();
     
     // void tracking(cv::Rect myBlob);
