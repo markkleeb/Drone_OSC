@@ -491,7 +491,16 @@ void ofApp::keyPressed(int key){
             
             
             case '0':
+            
+            for(int i=0; i<directions.size(); i++){
+                directions[i] = 0;
+            }
+            isTracking = false;
+            isScanning = false;
+            isFlying = false;
             directions[12] = 1;
+            
+            
             break;
 
         case 'e':
@@ -589,6 +598,7 @@ void ofApp::keyReleased(int key){
             
         case '0':
             directions[12] = 0;
+     
             break;
             
         case 'e':
@@ -616,6 +626,7 @@ void ofApp::keyReleased(int key){
                 directions[i] = 0;
             }
             break;
+            //why does of still seem to send osc messages even after land?
             
         case 'w':
             
