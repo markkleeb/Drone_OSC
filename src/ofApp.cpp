@@ -439,7 +439,7 @@ void ofApp::checkContours(){
             horzTimer = ofGetElapsedTimeMillis();
         }
         
-        else if(myArea > 50000 ){
+        else if(myArea > 45000 ){
             isScanning = false;
             isTracking = false;
             isArrived = true;
