@@ -26,7 +26,7 @@ void ofApp::setup(){
     myArea = 0;
     num = 0;
     
-    for(int i=0; i < 12; i++){
+    for(int i=0; i < 13; i++){
         directions.push_back(0);
     }
     
@@ -488,7 +488,11 @@ void ofApp::keyPressed(int key){
     
    
     switch(key){
-             
+            
+            
+            case '0':
+            directions[12] = 1;
+            break;
 
         case 'e':
             
@@ -582,6 +586,10 @@ void ofApp::keyReleased(int key){
     
     switch(key){
             
+            
+        case '0':
+            directions[12] = 0;
+            break;
             
         case 'e':
             
